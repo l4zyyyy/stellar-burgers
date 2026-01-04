@@ -1,24 +1,21 @@
-import { FC, memo } from 'react';
-import { BurgerConstructorElementUI } from '@ui';
-import { BurgerConstructorElementProps } from './type';
+import { FC } from 'react';
+import { ConstructorElement } from '@zlden/react-developer-burger-ui-components';
+import { TConstructorIngredient } from '@utils-types';
 
-export const BurgerConstructorElement: FC<BurgerConstructorElementProps> = memo(
-  ({ ingredient, index, totalItems }) => {
-    const handleMoveDown = () => {};
+type BurgerConstructorElementProps = {
+  ingredient: TConstructorIngredient;
+  index: number;
+  totalItems: number;
+};
 
-    const handleMoveUp = () => {};
-
-    const handleClose = () => {};
-
-    return (
-      <BurgerConstructorElementUI
-        ingredient={ingredient}
-        index={index}
-        totalItems={totalItems}
-        handleMoveUp={handleMoveUp}
-        handleMoveDown={handleMoveDown}
-        handleClose={handleClose}
-      />
-    );
-  }
+export const BurgerConstructorElement: FC<BurgerConstructorElementProps> = ({
+  ingredient
+}) => (
+  <li>
+    <ConstructorElement
+      text={ingredient.name}
+      price={ingredient.price}
+      thumbnail={ingredient.image}
+    />
+  </li>
 );

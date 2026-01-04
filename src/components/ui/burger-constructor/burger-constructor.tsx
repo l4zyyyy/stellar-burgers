@@ -5,20 +5,39 @@ import {
   CurrencyIcon
 } from '@zlden/react-developer-burger-ui-components';
 import styles from './burger-constructor.module.css';
-import { BurgerConstructorUIProps } from './type';
-import { TConstructorIngredient } from '@utils-types';
-import { BurgerConstructorElement, Modal } from '@components';
+import { TConstructorIngredient } from '../../../utils/types';
+import { BurgerConstructorElementUI } from '../burger-constructor-element';
+import { ModalUI } from '../modal';
 import { Preloader, OrderDetailsUI } from '@ui';
+
+type BurgerConstructorUIProps = {
+  constructorItems: {
+    bun: TConstructorIngredient | null;
+    ingredients: TConstructorIngredient[];
+  };
+  price: number;
+  orderRequest: boolean;
+  orderModalData: { number: number } | null;
+  onOrderClick: () => void;
+  closeOrderModal: () => void;
+  handleRemoveIngredient: (uuid: string) => void;
+  handleMoveUp: (index: number) => void;
+  handleMoveDown: (index: number) => void;
+};
 
 export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
   constructorItems,
-  orderRequest,
   price,
+  orderRequest,
   orderModalData,
   onOrderClick,
-  closeOrderModal
+  closeOrderModal,
+  handleRemoveIngredient,
+  handleMoveUp,
+  handleMoveDown
 }) => (
   <section className={styles.burger_constructor}>
+    {/* Верхняя булка */}
     {constructorItems.bun ? (
       <div className={`${styles.element} mb-4 mr-4`}>
         <ConstructorElement
@@ -36,18 +55,21 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
         Выберите булки
       </div>
     )}
+
+    {/* Список ингредиентов */}
     <ul className={styles.elements}>
       {constructorItems.ingredients.length > 0 ? (
-        constructorItems.ingredients.map(
-          (item: TConstructorIngredient, index: number) => (
-            <BurgerConstructorElement
-              ingredient={item}
-              index={index}
-              totalItems={constructorItems.ingredients.length}
-              key={item.id}
-            />
-          )
-        )
+        constructorItems.ingredients.map((item, index) => (
+          <BurgerConstructorElementUI
+            key={item.uuid}
+            ingredient={item}
+            index={index}
+            totalItems={constructorItems.ingredients.length}
+            handleMoveUp={() => handleMoveUp(index)}
+            handleMoveDown={() => handleMoveDown(index)}
+            handleClose={handleRemoveIngredient} // теперь тип совпадает
+          />
+        ))
       ) : (
         <div
           className={`${styles.noBuns} ml-8 mb-4 mr-5 text text_type_main-default`}
@@ -56,6 +78,8 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
         </div>
       )}
     </ul>
+
+    {/* Нижняя булка */}
     {constructorItems.bun ? (
       <div className={`${styles.element} mt-4 mr-4`}>
         <ConstructorElement
@@ -73,6 +97,8 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
         Выберите булки
       </div>
     )}
+
+    {/* Сумма и кнопка */}
     <div className={`${styles.total} mt-10 mr-4`}>
       <div className={`${styles.cost} mr-10`}>
         <p className={`text ${styles.text} mr-2`}>{price}</p>
@@ -82,24 +108,26 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
         htmlType='button'
         type='primary'
         size='large'
-        children='Оформить заказ'
         onClick={onOrderClick}
-      />
+      >
+        Оформить заказ
+      </Button>
     </div>
 
+    {/* Модалки */}
     {orderRequest && (
-      <Modal onClose={closeOrderModal} title={'Оформляем заказ...'}>
+      <ModalUI onClose={closeOrderModal} title='Оформляем заказ...'>
         <Preloader />
-      </Modal>
+      </ModalUI>
     )}
 
     {orderModalData && (
-      <Modal
+      <ModalUI
         onClose={closeOrderModal}
         title={orderRequest ? 'Оформляем заказ...' : ''}
       >
         <OrderDetailsUI orderNumber={orderModalData.number} />
-      </Modal>
+      </ModalUI>
     )}
   </section>
 );

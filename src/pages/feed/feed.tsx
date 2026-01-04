@@ -1,15 +1,30 @@
-import { Preloader } from '@ui';
+import { FC, useEffect } from 'react';
 import { FeedUI } from '@ui-pages';
-import { TOrder } from '@utils-types';
-import { FC } from 'react';
+import { useAppDispatch, useAppSelector } from '../../hooks/redux';
+import { wsConnect, wsDisconnect } from '../../services/slices/feedSlice';
 
 export const Feed: FC = () => {
-  /** TODO: взять переменную из стора */
-  const orders: TOrder[] = [];
+  const dispatch = useAppDispatch();
 
-  if (!orders.length) {
-    return <Preloader />;
-  }
+  const { orders, total, totalToday } = useAppSelector((state) => state.feed);
 
-  <FeedUI orders={orders} handleGetFeeds={() => {}} />;
+  useEffect(() => {
+    dispatch(wsConnect('wss://norma.education-services.ru/orders/all'));
+    return () => {
+      dispatch(wsDisconnect());
+    };
+  }, [dispatch]);
+
+  if (!orders.length) return <p style={{ textAlign: 'center' }}>Загрузка...</p>;
+
+  return (
+    <FeedUI
+      orders={orders}
+      total={total}
+      totalToday={totalToday}
+      handleGetFeeds={() =>
+        dispatch(wsConnect('wss://norma.education-services.ru/orders/all'))
+      }
+    />
+  );
 };

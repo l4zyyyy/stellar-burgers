@@ -1,67 +1,45 @@
 import { FC, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+import { useAppSelector } from '../../hooks/redux';
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
-import { TIngredient } from '@utils-types';
 
 export const OrderInfo: FC = () => {
-  /** TODO: взять переменные orderData и ingredients из стора */
-  const orderData = {
-    createdAt: '',
-    ingredients: [],
-    _id: '',
-    status: '',
-    name: '',
-    updatedAt: 'string',
-    number: 0
-  };
+  const { number } = useParams();
+  const ingredients = useAppSelector((state) => state.ingredients.items);
 
-  const ingredients: TIngredient[] = [];
+  const orderData =
+    useAppSelector((state) =>
+      state.feed.orders.find((o) => o.number === Number(number))
+    ) ||
+    useAppSelector((state) =>
+      state.profileOrders.orders.find((o) => o.number === Number(number))
+    );
 
-  /* Готовим данные для отображения */
   const orderInfo = useMemo(() => {
     if (!orderData || !ingredients.length) return null;
 
     const date = new Date(orderData.createdAt);
+    const ingredientsInfo: any = {};
 
-    type TIngredientsWithCount = {
-      [key: string]: TIngredient & { count: number };
-    };
+    orderData.ingredients.forEach((id) => {
+      const ingredient = ingredients.find((i) => i._id === id);
+      if (!ingredient) return;
 
-    const ingredientsInfo = orderData.ingredients.reduce(
-      (acc: TIngredientsWithCount, item) => {
-        if (!acc[item]) {
-          const ingredient = ingredients.find((ing) => ing._id === item);
-          if (ingredient) {
-            acc[item] = {
-              ...ingredient,
-              count: 1
-            };
-          }
-        } else {
-          acc[item].count++;
-        }
-
-        return acc;
-      },
-      {}
-    );
+      ingredientsInfo[id] = ingredientsInfo[id]
+        ? { ...ingredientsInfo[id], count: ingredientsInfo[id].count + 1 }
+        : { ...ingredient, count: 1 };
+    });
 
     const total = Object.values(ingredientsInfo).reduce(
-      (acc, item) => acc + item.price * item.count,
+      (acc: number, item: any) => acc + item.price * item.count,
       0
     );
 
-    return {
-      ...orderData,
-      ingredientsInfo,
-      date,
-      total
-    };
+    return { ...orderData, ingredientsInfo, date, total };
   }, [orderData, ingredients]);
 
-  if (!orderInfo) {
-    return <Preloader />;
-  }
+  if (!orderInfo) return <Preloader />;
 
   return <OrderInfoUI orderInfo={orderInfo} />;
 };

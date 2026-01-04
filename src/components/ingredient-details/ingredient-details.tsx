@@ -1,14 +1,19 @@
 import { FC } from 'react';
+import { useParams } from 'react-router-dom';
+import { useAppSelector } from '../../hooks/redux';
 import { Preloader } from '../ui/preloader';
 import { IngredientDetailsUI } from '../ui/ingredient-details';
 
 export const IngredientDetails: FC = () => {
-  /** TODO: взять переменную из стора */
-  const ingredientData = null;
+  const { id } = useParams();
 
-  if (!ingredientData) {
+  const ingredient = useAppSelector((state) =>
+    state.ingredients.items.find((item) => item._id === id)
+  );
+
+  if (!ingredient) {
     return <Preloader />;
   }
 
-  return <IngredientDetailsUI ingredientData={ingredientData} />;
+  return <IngredientDetailsUI ingredientData={ingredient} />;
 };

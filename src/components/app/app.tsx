@@ -16,6 +16,7 @@ import { useAppDispatch } from '../../hooks/redux';
 import { checkUserAuth } from '../../services/slices/authSlice';
 import styles from './app.module.css';
 import { ProtectedRoute } from '../ProtectedRoute';
+import { fetchIngredients } from '../../services/slices/ingredientsSlice';
 
 const App = () => {
   const location = useLocation();
@@ -25,6 +26,7 @@ const App = () => {
 
   useEffect(() => {
     dispatch(checkUserAuth());
+    dispatch(fetchIngredients());
   }, [dispatch]);
 
   const handleCloseModal = () => navigate(-1);

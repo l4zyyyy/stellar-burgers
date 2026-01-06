@@ -1,9 +1,8 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, nanoid } from '@reduxjs/toolkit';
 import { TIngredient, TConstructorIngredient } from '../../utils/types';
-import { nanoid } from 'nanoid';
 
 type ConstructorState = {
-  bun: TConstructorIngredient | null; // теперь bun тоже TConstructorIngredient
+  bun: TConstructorIngredient | null;
   ingredients: TConstructorIngredient[];
 };
 
@@ -16,21 +15,22 @@ const constructorSlice = createSlice({
   name: 'constructor',
   initialState,
   reducers: {
-    addIngredient: (state, action: PayloadAction<TIngredient>) => {
-      if (action.payload.type === 'bun') {
-        state.bun = { ...action.payload, uuid: nanoid() }; // добавляем uuid
-      } else {
-        state.ingredients.push({
-          ...action.payload,
-          uuid: nanoid()
-        });
-      }
+    addIngredient: {
+      reducer: (state, action: PayloadAction<TConstructorIngredient>) => {
+        if (action.payload.type === 'bun') {
+          state.bun = action.payload;
+        } else {
+          state.ingredients.push(action.payload);
+        }
+      },
+      prepare: (ingredient: TIngredient) => ({
+        payload: { ...ingredient, uuid: nanoid() }
+      })
     },
     removeIngredient: (state, action: PayloadAction<string>) => {
       state.ingredients = state.ingredients.filter(
         (item) => item.uuid !== action.payload
       );
-      // если удаляем булку — сбрасываем
       if (state.bun?.uuid === action.payload) {
         state.bun = null;
       }

@@ -1,17 +1,17 @@
-import { Middleware } from '@reduxjs/toolkit';
+import { Middleware, UnknownAction } from '@reduxjs/toolkit';
 
 export const socketMiddleware: Middleware = (store) => {
   let socket: WebSocket | null = null;
 
-  return (next) => (action: any) => {
+  return (next) => (action) => {
     const { dispatch } = store;
-    const { type, payload } = action;
+    const { type, payload } = action as UnknownAction;
 
     if (type === 'feed/wsConnect' || type === 'profileOrders/wsConnect') {
       if (socket) {
         socket.close();
       }
-      socket = new WebSocket(payload);
+      socket = new WebSocket(payload as string);
 
       socket.onopen = () => {
         const openType =

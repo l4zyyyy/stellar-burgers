@@ -1,53 +1,53 @@
 import { FC, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+import { useAppSelector } from '../../hooks/redux';
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
 import { TIngredient } from '@utils-types';
 
 export const OrderInfo: FC = () => {
-  /** TODO: взять переменные orderData и ingredients из стора */
-  const orderData = {
-    createdAt: '',
-    ingredients: [],
-    _id: '',
-    status: '',
-    name: '',
-    updatedAt: 'string',
-    number: 0
-  };
+  const { number } = useParams();
 
-  const ingredients: TIngredient[] = [];
+  // Достаем данные с защитой от undefined
+  const ingredients: TIngredient[] =
+    useAppSelector((state) => state.ingredients.items) || [];
 
-  /* Готовим данные для отображения */
+  const feedOrders = useAppSelector((state) => state.feed.orders) || [];
+  const profileOrders =
+    useAppSelector((state) => state.profileOrders.orders) || [];
+
+  // Находим данные заказа
+  const orderData = useMemo(
+    () =>
+      [...feedOrders, ...profileOrders].find(
+        (o) => o.number === Number(number)
+      ),
+    [feedOrders, profileOrders, number]
+  );
+
   const orderInfo = useMemo(() => {
-    if (!orderData || !ingredients.length) return null;
+    // Если заказа нет или ингредиенты еще не загружены — возвращаем null
+    if (!orderData || ingredients.length === 0) return null;
 
     const date = new Date(orderData.createdAt);
+    const ingredientsInfo: any = {};
 
-    type TIngredientsWithCount = {
-      [key: string]: TIngredient & { count: number };
-    };
+    orderData.ingredients.forEach((id) => {
+      const ingredient = ingredients.find((i) => i._id === id);
+      if (!ingredient) return;
 
-    const ingredientsInfo = orderData.ingredients.reduce(
-      (acc: TIngredientsWithCount, item) => {
-        if (!acc[item]) {
-          const ingredient = ingredients.find((ing) => ing._id === item);
-          if (ingredient) {
-            acc[item] = {
-              ...ingredient,
-              count: 1
-            };
-          }
-        } else {
-          acc[item].count++;
-        }
-
-        return acc;
-      },
-      {}
-    );
+      if (!ingredientsInfo[id]) {
+        ingredientsInfo[id] = {
+          ...ingredient,
+          count: 1
+        };
+      } else {
+        ingredientsInfo[id].count++;
+      }
+    });
 
     const total = Object.values(ingredientsInfo).reduce(
-      (acc, item) => acc + item.price * item.count,
+      (acc: number, item: any) => acc + item.price * item.count,
       0
     );
 
@@ -57,8 +57,9 @@ export const OrderInfo: FC = () => {
       date,
       total
     };
-  }, [orderData, ingredients]);
+  }, [orderData, ingredients]); // Здесь теперь всегда стабильные ссылки
 
+  // Если информация еще собирается — показываем загрузку
   if (!orderInfo) {
     return <Preloader />;
   }

@@ -1,8 +1,19 @@
 import React, { FC, memo } from 'react';
 import styles from './burger-constructor-element.module.css';
-import { ConstructorElement } from '@zlden/react-developer-burger-ui-components';
-import { BurgerConstructorElementUIProps } from './type';
-import { MoveButton } from '@zlden/react-developer-burger-ui-components';
+import {
+  ConstructorElement,
+  MoveButton
+} from '@zlden/react-developer-burger-ui-components';
+import { TConstructorIngredient } from '../../../utils/types';
+
+export type BurgerConstructorElementUIProps = {
+  ingredient: TConstructorIngredient;
+  index: number;
+  totalItems: number;
+  handleMoveUp: () => void;
+  handleMoveDown: () => void;
+  handleClose: (uuid: string) => void;
+};
 
 export const BurgerConstructorElementUI: FC<BurgerConstructorElementUIProps> =
   memo(
@@ -26,7 +37,7 @@ export const BurgerConstructorElementUI: FC<BurgerConstructorElementUIProps> =
             text={ingredient.name}
             price={ingredient.price}
             thumbnail={ingredient.image}
-            handleClose={handleClose}
+            handleClose={() => handleClose(ingredient.uuid)}
           />
         </div>
       </li>

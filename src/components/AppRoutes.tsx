@@ -34,7 +34,8 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
 
 const AppRoutes = () => {
   const location = useLocation();
-  const background = location.state && (location.state as any).background;
+  const background =
+    location.state && (location.state as { background?: Location }).background;
   const navigate = useNavigate();
 
   const closeModal = () => navigate(-1);

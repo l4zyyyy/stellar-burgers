@@ -7,16 +7,12 @@ import { TIngredient } from '@utils-types';
 
 export const OrderInfo: FC = () => {
   const { number } = useParams();
-
-  // Достаем данные с защитой от undefined
   const ingredients: TIngredient[] =
     useAppSelector((state) => state.ingredients.items) || [];
-
   const feedOrders = useAppSelector((state) => state.feed.orders) || [];
   const profileOrders =
     useAppSelector((state) => state.profileOrders.orders) || [];
 
-  // Находим данные заказа
   const orderData = useMemo(
     () =>
       [...feedOrders, ...profileOrders].find(
@@ -26,43 +22,32 @@ export const OrderInfo: FC = () => {
   );
 
   const orderInfo = useMemo(() => {
-    // Если заказа нет или ингредиенты еще не загружены — возвращаем null
     if (!orderData || ingredients.length === 0) return null;
 
     const date = new Date(orderData.createdAt);
-    const ingredientsInfo: any = {};
+    type TIngredientWithCount = TIngredient & { count: number };
+    const ingredientsInfo: Record<string, TIngredientWithCount> = {};
 
     orderData.ingredients.forEach((id) => {
       const ingredient = ingredients.find((i) => i._id === id);
       if (!ingredient) return;
 
       if (!ingredientsInfo[id]) {
-        ingredientsInfo[id] = {
-          ...ingredient,
-          count: 1
-        };
+        ingredientsInfo[id] = { ...ingredient, count: 1 };
       } else {
         ingredientsInfo[id].count++;
       }
     });
 
     const total = Object.values(ingredientsInfo).reduce(
-      (acc: number, item: any) => acc + item.price * item.count,
+      (acc, item) => acc + item.price * item.count,
       0
     );
 
-    return {
-      ...orderData,
-      ingredientsInfo,
-      date,
-      total
-    };
-  }, [orderData, ingredients]); // Здесь теперь всегда стабильные ссылки
+    return { ...orderData, ingredientsInfo, date, total };
+  }, [orderData, ingredients]);
 
-  // Если информация еще собирается — показываем загрузку
-  if (!orderInfo) {
-    return <Preloader />;
-  }
+  if (!orderInfo) return <Preloader />;
 
   return <OrderInfoUI orderInfo={orderInfo} />;
 };

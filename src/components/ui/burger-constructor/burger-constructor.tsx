@@ -36,10 +36,16 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
   handleMoveUp,
   handleMoveDown
 }) => (
-  <section className={styles.burger_constructor}>
+  <section
+    className={styles.burger_constructor}
+    data-cy='constructor-drop-area'
+  >
     {/* Верхняя булка */}
     {constructorItems.bun ? (
-      <div className={`${styles.element} mb-4 mr-4`}>
+      <div
+        className={`${styles.element} mb-4 mr-4`}
+        data-cy='constructor-bun-1'
+      >
         <ConstructorElement
           type='top'
           isLocked
@@ -60,15 +66,16 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
     <ul className={styles.elements}>
       {constructorItems.ingredients.length > 0 ? (
         constructorItems.ingredients.map((item, index) => (
-          <BurgerConstructorElementUI
-            key={item.uuid}
-            ingredient={item}
-            index={index}
-            totalItems={constructorItems.ingredients.length}
-            handleMoveUp={() => handleMoveUp(index)}
-            handleMoveDown={() => handleMoveDown(index)}
-            handleClose={handleRemoveIngredient} // теперь тип совпадает
-          />
+          <div key={item.uuid} data-cy='constructor-filling'>
+            <BurgerConstructorElementUI
+              ingredient={item}
+              index={index}
+              totalItems={constructorItems.ingredients.length}
+              handleMoveUp={() => handleMoveUp(index)}
+              handleMoveDown={() => handleMoveDown(index)}
+              handleClose={handleRemoveIngredient}
+            />
+          </div>
         ))
       ) : (
         <div
@@ -81,7 +88,10 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
 
     {/* Нижняя булка */}
     {constructorItems.bun ? (
-      <div className={`${styles.element} mt-4 mr-4`}>
+      <div
+        className={`${styles.element} mt-4 mr-4`}
+        data-cy='constructor-bun-2'
+      >
         <ConstructorElement
           type='bottom'
           isLocked
@@ -109,6 +119,7 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
         type='primary'
         size='large'
         onClick={onOrderClick}
+        data-cy='order-button'
       >
         Оформить заказ
       </Button>
